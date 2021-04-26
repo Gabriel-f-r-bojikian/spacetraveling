@@ -26,9 +26,20 @@ interface PostProps {
   post: Post;
 }
 
-// export default function Post() {
-//   // TODO
-// }
+export default function Post({ post }: PostProps) {
+  return(
+    <>
+      <main>
+        <article>
+          <h1>Título do post</h1>
+          <p>Subtítulo do post</p>
+          <time>25 de Abril de 2021</time>
+          <p>Autor</p>
+        </article>
+      </main>
+    </>
+  )
+}
 
 // export const getStaticPaths = async () => {
 //   const prismic = getPrismicClient();
