@@ -1,4 +1,5 @@
 import { GetStaticProps } from 'next';
+import Link from 'next/link';
 import Header from '../components/Header';
 
 import { getPrismicClient } from '../services/prismic';
@@ -28,7 +29,7 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-export default function Home({ posts }: PostPagination) {
+export default function Home({ posts }) {
   return (
     <div className={styles.pageContainer}>
       <Header />
@@ -38,18 +39,18 @@ export default function Home({ posts }: PostPagination) {
           
           {posts.map(post => {
             return (
-              <a key={post} href="#">
-                <strong>{post.title}</strong>
-                <p>{post.subtitle}</p>
-                <div className={styles.postInfo}>
-                  <p><FiCalendar /> <time>{post.updatedAt}</time></p>
-                  <p><BsPerson /> {post.author}</p>
-                </div>
-              </a>
+              <Link href={`/post/${post.slug}`}>
+                <a key={post.slug}>
+                  <strong>{post.data.title}</strong>
+                  <p>{post.data.subtitle}</p>
+                  <div className={styles.postInfo}>
+                    <p><FiCalendar /> <time>{post.updatedAt}</time></p>
+                    <p><BsPerson /> {post.data.author}</p>
+                  </div>
+                </a>
+              </Link>
             )
-          })}
-
-          
+          })}          
         </div>
 
         <a className={styles.loadMoreButton}>
@@ -70,14 +71,16 @@ export const getStaticProps: GetStaticProps = async () => {
     const posts = postsResponse.results.map(post => {
       return {
         slug: post.uid,
-        author: post.data.author,
-        title: post.data.title,
-        subtitle: post.data.subtitle,
         updatedAt: new Date(post.last_publication_date).toLocaleDateString('pt-BR', {
           day: '2-digit',
           month: 'long',
           year: 'numeric'
-        })
+        }),
+        data: {
+          author: post.data.author,
+          title: post.data.title,
+          subtitle: post.data.subtitle,
+        }
       };
     });
 
