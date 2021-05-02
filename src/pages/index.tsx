@@ -1,6 +1,7 @@
 import { GetStaticProps } from 'next';
 import Link from 'next/link';
 import Header from '../components/Header';
+import LoadMoreButton from '../components/LoadMoreButton';
 
 import Prismic from '@prismicio/client'
 import { getPrismicClient } from '../services/prismic';
@@ -10,7 +11,8 @@ import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
 import { FiCalendar } from 'react-icons/fi'
 import { BsPerson } from 'react-icons/bs'
-import LoadMoreButton from '../components/LoadMoreButton';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 
 interface Post {
   uid?: string;
@@ -46,8 +48,18 @@ export default function Home({ postsPagination }: HomeProps) {
                   <strong>{post.data.title}</strong>
                   <p>{post.data.subtitle}</p>
                   <div className={styles.postInfo}>
-                    <p><FiCalendar /> <time>{post.first_publication_date}</time></p>
-                    <p><BsPerson /> {post.data.author}</p>
+                    <FiCalendar /> 
+                    <time>
+                      {
+                        format(
+                          new Date(post.first_publication_date),
+                          "d MMM yyyy",
+                          { locale: ptBR }
+                        )
+                      }
+                      </time>
+                    <BsPerson /> 
+                    <span>{post.data.author}</span>
                   </div>
                 </a>
               </Link>
@@ -65,20 +77,13 @@ export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient();
   const postsResponse = await prismic.query( Prismic.predicates.at('document.type', 'posts'), {
       pageSize : 4,
-      fetch: ['posts.title', 'posts.subtitle', 'posts.author'],
-      orderings: '[my.post.date desc]'
+      fetch: ['posts.title', 'posts.subtitle', 'posts.author']
     });
-
-    // console.log(JSON.stringify(postsResponse, null, 2))
     
     const formattedPosts = postsResponse.results.map(post => {
       return {
         uid: post.uid,
-        first_publication_date: new Date(post.first_publication_date).toLocaleDateString('pt-BR', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
-        }),
+        first_publication_date: post.first_publication_date,
         data: {
           author: post.data.author,
           title: post.data.title,
