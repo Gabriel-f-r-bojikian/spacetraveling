@@ -1,4 +1,4 @@
-import { GetStaticProps } from 'next';
+import next, { GetStaticProps } from 'next';
 import Link from 'next/link';
 import Header from '../components/Header';
 import LoadMoreButton from '../components/LoadMoreButton';
@@ -13,6 +13,7 @@ import { FiCalendar } from 'react-icons/fi'
 import { BsPerson } from 'react-icons/bs'
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
+import { useState } from 'react';
 
 interface Post {
   uid?: string;
@@ -34,6 +35,39 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps) {
+  
+  const [posts, setPosts] = useState<Post[]>(postsPagination.results);
+  const [nextPage, setNextPage] = useState(postsPagination.next_page);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  async function handleNextPage() {
+    if (currentPage !== 1 && nextPage === null) {
+      return;
+    }
+
+    const postResults = await fetch(`${nextPage}`).then(response => response.json());
+
+    console.log(postResults);
+
+    setNextPage(postResults.next_page);
+    setCurrentPage(postResults.page);
+
+    const newFormattedPosts = postResults.results.map( post => {
+      return {
+        uid: post.uid,
+        first_publication_date: post.first_publication_date,
+        data: {
+          author: post.data.author,
+          title: post.data.title,
+          subtitle: post.data.subtitle,
+        }
+      };
+    });
+
+    setPosts([...posts, ...newFormattedPosts ])
+
+  }
+  
   return (
     <div className={styles.pageContainer}>
       <Header />
@@ -41,9 +75,9 @@ export default function Home({ postsPagination }: HomeProps) {
       <main className={styles.container}>
         <div className={styles.posts}>
           
-          {postsPagination.results.map(post => {
+          {posts.map(post => {
             return (
-              <Link href={`/post/${post.uid}`}>
+              <Link key={post.uid} href={`/post/${post.uid}`}>
                 <a key={post.uid}>
                   <strong>{post.data.title}</strong>
                   <p>{post.data.subtitle}</p>
@@ -67,7 +101,9 @@ export default function Home({ postsPagination }: HomeProps) {
           })}          
         </div>
         
-        <LoadMoreButton next_page={postsPagination.next_page} />
+        {nextPage && (
+          <LoadMoreButton onClick={handleNextPage} next_page={postsPagination.next_page} />
+        )}
       </main>
     </div>
   )
@@ -76,7 +112,7 @@ export default function Home({ postsPagination }: HomeProps) {
 export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient();
   const postsResponse = await prismic.query( Prismic.predicates.at('document.type', 'posts'), {
-      pageSize : 4,
+      pageSize : 1,
       fetch: ['posts.title', 'posts.subtitle', 'posts.author']
     });
     
