@@ -12,6 +12,7 @@ import Header from '../../components/Header';
 import { FiCalendar } from 'react-icons/fi';
 import { BsPerson } from 'react-icons/bs';
 import { AiOutlineClockCircle } from 'react-icons/ai';
+import { useRouter } from 'next/router';
 
 interface Post {
   first_publication_date: string | null;
@@ -35,6 +36,12 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps) {
+
+  const router = useRouter();
+
+  if(router.isFallback) {
+    return <div>Carregando...</div>
+  }
 
   function countTimeToReadPost() {
     let numberOfWords = 0;
@@ -118,7 +125,7 @@ export const getStaticPaths = async () => {
     params: {slug: post.uid.toString()}
   }));
 
-  return { paths, fallback: false };
+  return { paths, fallback: true };
 };
 
 export async function getStaticProps({ params }) {
@@ -143,8 +150,7 @@ export async function getStaticProps({ params }) {
   }
 
   return {
-    props: {
-      post
-    }
+    props: { post },
+    revalidate: 1,
   }
 };
