@@ -11,6 +11,7 @@ import styles from './post.module.scss';
 import Header from '../../components/Header';
 import { FiCalendar } from 'react-icons/fi';
 import { BsPerson } from 'react-icons/bs';
+import { AiOutlineClockCircle } from 'react-icons/ai';
 
 interface Post {
   first_publication_date: string | null;
@@ -34,6 +35,37 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps) {
+
+  function countTimeToReadPost() {
+    let numberOfWords = 0;
+    const wordsReadPerMinute = 200;
+    
+    numberOfWords = post.data.content.reduce(countWordsInPieceOfContent, 0);
+
+    return Math.ceil(numberOfWords/wordsReadPerMinute);
+  }
+
+  function countWordsInPieceOfContent(wordsCountedSoFar: number, pieceOfContent) {
+    const wordsInHeading = countWords(pieceOfContent.heading);
+    const wordsInBody = countWordsInBody(pieceOfContent.body);
+    return wordsCountedSoFar + wordsInHeading + wordsInBody;
+  }
+
+  function countWords(str: string) {
+    str = str.toString();
+    str = str.replace(/(^\s*)|(\s*$)/gi,"");
+    str = str.replace(/[ ]{2,}/gi," ");
+    str = str.replace(/\n /,"\n");
+    return str.split(' ').length;
+  }
+
+  function countWordsInBody(body: string[]) {
+    return body.reduce(countWordsInParagraph, 0);
+  }
+
+  function countWordsInParagraph(totalWordsInContentBody: number, paragraph) {
+    return totalWordsInContentBody + countWords(paragraph.text);
+  }
   
   return(
     <>
@@ -55,6 +87,9 @@ export default function Post({ post }: PostProps) {
             </time>
             <BsPerson />
             <span>{post.data.author}</span>
+
+            <AiOutlineClockCircle />
+            <span>{countTimeToReadPost()} min</span>
             
             {post.data.content.map( postSection => {
               return (
