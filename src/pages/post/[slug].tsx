@@ -80,23 +80,27 @@ export default function Post({ post }: PostProps) {
       <div className={styles.postContainer}>
         <main>
           <article>
-            <img src={post.data.banner.url} alt="Banner do post" />
+            <div className={styles.bannerContainer}>
+              <img src={post.data.banner.url} alt="Banner do post" />
+            </div>
             <h1>{post.data.title}</h1>
-            <FiCalendar /> 
-            <time>
-              {
-                format(
-                  new Date(post.first_publication_date),
-                  "d MMM yyyy",
-                  { locale: ptBR }
-                )
-              }
-            </time>
-            <BsPerson />
-            <span>{post.data.author}</span>
+            <div className={styles.postInformation}>
+              <FiCalendar /> 
+              <time>
+                {
+                  format(
+                    new Date(post.first_publication_date),
+                    "d MMM yyyy",
+                    { locale: ptBR }
+                  )
+                }
+              </time>
+              <BsPerson />
+              <span>{post.data.author}</span>
 
-            <AiOutlineClockCircle />
-            <span>{countTimeToReadPost()} min</span>
+              <AiOutlineClockCircle />
+              <span>{countTimeToReadPost()} min</span>
+            </div>
             
             {post.data.content.map( postSection => {
               return (
