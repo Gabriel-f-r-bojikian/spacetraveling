@@ -8,8 +8,8 @@ export default function Header() {
       <div className={styles.headerContent}>
         <Link href="/">
           <a>
-            <img src="assets/Vectorlogo.svg" alt="logo"/>
-            <img src="assets/spacetravelingLogoName.svg" alt="Space Traveling"/>
+            <img src="/assets/Vectorlogo.svg" alt="logo"/>
+            <img src="/assets/spacetravelingLogoName.svg" alt="Space Traveling"/>
           </a>
         </Link>
       </div>
