@@ -12,6 +12,7 @@ import Header from '../../components/Header';
 import { FiCalendar } from 'react-icons/fi';
 import { BsPerson } from 'react-icons/bs';
 import { AiOutlineClockCircle } from 'react-icons/ai';
+import { useRouter } from 'next/router';
 
 interface Post {
   first_publication_date: string | null;
@@ -35,6 +36,12 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps) {
+
+  const router = useRouter();
+
+  if(router.isFallback) {
+    return <div>Carregando...</div>
+  }
 
   function countTimeToReadPost() {
     let numberOfWords = 0;
@@ -73,23 +80,27 @@ export default function Post({ post }: PostProps) {
       <div className={styles.postContainer}>
         <main>
           <article>
-            <img src={post.data.banner.url} alt="Banner do post" />
+            <div className={styles.bannerContainer}>
+              <img src={post.data.banner.url} alt="Banner do post" />
+            </div>
             <h1>{post.data.title}</h1>
-            <FiCalendar /> 
-            <time>
-              {
-                format(
-                  new Date(post.first_publication_date),
-                  "d MMM yyyy",
-                  { locale: ptBR }
-                )
-              }
-            </time>
-            <BsPerson />
-            <span>{post.data.author}</span>
+            <div className={styles.postInformation}>
+              <FiCalendar /> 
+              <time>
+                {
+                  format(
+                    new Date(post.first_publication_date),
+                    "d MMM yyyy",
+                    { locale: ptBR }
+                  )
+                }
+              </time>
+              <BsPerson />
+              <span>{post.data.author}</span>
 
-            <AiOutlineClockCircle />
-            <span>{countTimeToReadPost()} min</span>
+              <AiOutlineClockCircle />
+              <span>{countTimeToReadPost()} min</span>
+            </div>
             
             {post.data.content.map( postSection => {
               return (
@@ -118,7 +129,7 @@ export const getStaticPaths = async () => {
     params: {slug: post.uid.toString()}
   }));
 
-  return { paths, fallback: false };
+  return { paths, fallback: true };
 };
 
 export async function getStaticProps({ params }) {
@@ -143,8 +154,7 @@ export async function getStaticProps({ params }) {
   }
 
   return {
-    props: {
-      post
-    }
+    props: { post },
+    revalidate: 1,
   }
 };
